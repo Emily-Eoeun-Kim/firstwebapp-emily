@@ -12,10 +12,29 @@ function sum(list: Buyer[], pick: (b: Buyer) => number): number {
   return list.reduce((s, b) => s + pick(b), 0);
 }
 
+function byId(a: Buyer, b: Buyer): number {
+  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
+
 /** 위험 순서: pd30d 큰 순, 같으면 id 순 */
 function byRisk(a: Buyer, b: Buyer): number {
   if (b.pd30d !== a.pd30d) return b.pd30d - a.pd30d;
-  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  return byId(a, b);
+}
+
+export function totalAr(buyers: Buyer[]): number {
+  return sum(buyers, (b) => b.openArUsd);
+}
+
+/** 우량 거래처의 '늦지 않게 회수' 기준: 최근 1년 평균 지연이 이 일수 이하 */
+export const GOOD_MAX_LATE_DAYS = 10;
+
+/** 우량 거래처: 지금 연체 $0 · 최근 1년 평균 지연 10일 이하(기록 없으면 뺌) · 채권 큰 순(같으면 id 순) */
+export function goodTop(buyers: Buyer[], n = 10): Buyer[] {
+  return buyers
+    .filter((b) => b.overdueUsd === 0 && b.avgDaysLate12m !== null && b.avgDaysLate12m <= GOOD_MAX_LATE_DAYS)
+    .sort((a, b) => b.openArUsd - a.openArUsd || byId(a, b))
+    .slice(0, n);
 }
 
 export function kpis(buyers: Buyer[]) {

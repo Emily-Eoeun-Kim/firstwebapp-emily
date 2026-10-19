@@ -14,7 +14,7 @@ export default function SiteNav() {
         className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 sm:px-6"
       >
         <Link href="/" className="mr-2 flex min-h-11 items-center font-semibold text-ink">
-          한빛정밀 웹 작업대
+          한빛정밀 CRM
         </Link>
         <ul className="flex flex-wrap items-center gap-x-1">
           {NAV_ITEMS.map((item) => (

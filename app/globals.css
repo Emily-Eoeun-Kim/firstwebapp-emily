@@ -14,6 +14,13 @@
   --color-grade-b: #a15c00;
   --color-grade-c: #b42318;
 
+  /* CRM 색(자유 퀘스트): 신뢰의 남색 · 돈이 들어오는 청록 · 위험 쪽 연한 바탕 */
+  --color-brand: #14325a;
+  --color-brand-soft: #eaf0f8;
+  --color-good: #0b7a5e;
+  --color-good-soft: #e3f3ee;
+  --color-risk-soft: #fcebe9;
+
   --font-sans: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
@@ -32,4 +39,12 @@ body {
 .num {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* 펼치기(<details>)의 기본 삼각형 숨김 — 대신 부품 안의 화살표를 쓴다 */
+summary {
+  list-style: none;
+}
+summary::-webkit-details-marker {
+  display: none;
 }
