@@ -106,8 +106,8 @@ export default async function Home() {
       <DuelBoard
         good={good}
         risk={risk}
-        goodLine={`연체 $0 · 최근 1년 평균 지연 ${GOOD_MAX_LATE_DAYS}일 이하 · 채권 큰 순. 줄을 누르면 펼쳐집니다.`}
-        riskLine="위험 점수 높은 순(막대 = 위험 점수). 줄을 누르면 펼쳐집니다."
+        goodLine={`연체 $0 · 최근 1년 평균 지연 ${GOOD_MAX_LATE_DAYS}일 이하 · 채권 큰 순`}
+        riskLine="위험 점수 높은 순(막대 = 위험 점수)"
       />
 
       <section aria-labelledby="grade-mix" className="rounded-lg bg-brand-soft p-4 sm:p-5">
