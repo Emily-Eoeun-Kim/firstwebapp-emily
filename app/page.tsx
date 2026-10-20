@@ -4,12 +4,16 @@ import DeployBadge from "@/components/DeployBadge";
 import DuelBoard from "@/components/DuelBoard";
 import GradeDonut from "@/components/GradeDonut";
 import { getBuyers } from "@/lib/buyers";
-import { int, pct, usd } from "@/lib/format";
+import { int, kst, pct, usd } from "@/lib/format";
 import { GOOD_MAX_LATE_DAYS, goodTop, gradeCounts, kpis, topRisk, totalAr } from "@/lib/metrics";
+import { getRecentReviews, statusClass } from "@/lib/reviews";
 
-// 한빛정밀 CRM 첫 화면 — 숫자는 data/buyers.json에서 lib/metrics.ts가 계산한다(손으로 적은 숫자 없음).
+export const dynamic = "force-dynamic";
+
+// 한빛정밀 CRM 첫 화면 — 숫자는 Supabase DB에서 읽은 바이어로 lib/metrics.ts가 계산한다(손으로 적은 숫자 없음).
 export default async function Home() {
   const buyers = await getBuyers();
+  const recent = await getRecentReviews(5);
   const k = kpis(buyers);
   const good = goodTop(buyers, 10);
   const risk = topRisk(buyers, 10);
@@ -28,7 +32,7 @@ export default async function Home() {
     .join(" ");
 
   const stats = [
-    { label: "전체 채권", tone: "text-brand", value: usd(k.arUsd), sub: `${int(k.count)}곳` },
+    { label: "전체 채권", tone: "text-brand", value: usd(k.arUsd), sub: `${int(k.count)}곳 · Supabase DB에서 읽음` },
     { label: `우량 ${good.length}곳 채권`, tone: "text-good", value: usd(goodAr), sub: `전체의 ${pct(goodShare)}` },
     { label: "C등급 채권", tone: "text-grade-c", value: usd(k.cArUsd), sub: `전체의 ${pct(k.cShare)} · ${int(k.cCount)}곳` },
   ];
@@ -70,6 +74,39 @@ export default async function Home() {
           등급 구성
         </h2>
         <GradeDonut counts={gradeCounts(buyers)} total={k.count} />
+      </section>
+
+      <section aria-labelledby="recent-reviews" className="space-y-3">
+        <h2 id="recent-reviews" className="text-lg font-bold text-ink">
+          최근 확인 기록
+        </h2>
+        {recent.length > 0 ? (
+          <ul className="space-y-2">
+            {recent.map((r) => (
+              <li key={r.id} className="rounded-lg border border-line bg-bg p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link
+                    href={`/buyers/${r.buyerId}`}
+                    className="inline-flex min-h-11 items-center font-semibold text-accent hover:underline"
+                  >
+                    <span className="num">{r.buyerId}</span>&nbsp;· {r.buyer.name}
+                  </Link>
+                  <span
+                    className={`inline-flex items-center rounded border px-1.5 text-sm font-semibold ${statusClass(r.status)}`}
+                  >
+                    {r.status}
+                  </span>
+                </div>
+                <p className="mt-1 whitespace-pre-line wrap-break-word text-ink">{r.memo}</p>
+                <p className="mt-1 text-sm text-muted">
+                  {r.reviewer} · <span className="num">{kst(r.createdAt)}</span>
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-muted">아직 확인 기록이 없습니다</p>
+        )}
       </section>
 
       <div className="flex flex-wrap items-center gap-3">
