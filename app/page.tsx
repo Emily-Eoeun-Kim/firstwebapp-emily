@@ -56,10 +56,6 @@ export default async function Home() {
         <h1 id="crm-title" className="mt-1 text-2xl font-bold">
           한빛정밀 CRM
         </h1>
-        <p className="mt-2 text-brand-soft">
-          거래처 <span className="num">{int(k.count)}곳</span>의 채권과 위험을 한 장에 모았습니다. 위험 점수는 판단을 돕는
-          값이고, 결정은 사람이 합니다.
-        </p>
         <dl className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {stats.map((s) => (
             <div key={s.label} className="rounded-md bg-bg p-3">
