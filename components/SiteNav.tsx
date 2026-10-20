@@ -1,9 +1,11 @@
 import Link from "next/link";
+import NavLinks from "@/components/NavLinks";
 
 // 위쪽 메뉴. 쪽을 더하면 여기에 한 줄을 더한다(예: { href: "/buyers", label: "바이어" }).
 export const NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/", label: "홈" },
   { href: "/buyers", label: "바이어" },
+  { href: "/calendar", label: "캘린더" },
 ];
 
 export default function SiteNav() {
@@ -16,18 +18,7 @@ export default function SiteNav() {
         <Link href="/" className="mr-2 flex min-h-11 items-center font-semibold text-ink">
           한빛정밀 CRM
         </Link>
-        <ul className="flex flex-wrap items-center gap-x-1">
-          {NAV_ITEMS.map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className="flex min-h-11 items-center rounded-md px-3 text-sm text-muted hover:bg-surface hover:text-ink"
-              >
-                {item.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <NavLinks items={NAV_ITEMS} />
       </nav>
     </header>
   );

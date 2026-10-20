@@ -120,7 +120,7 @@ export default function DuelBoard({
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <Column side="good" title={`우량 거래처 ${good.length}`} line={goodLine} buyers={good} />
-      <Column side="risk" title={`위험 상위 ${risk.length}`} line={riskLine} buyers={risk} />
+      <Column side="risk" title={`위험 거래처 ${risk.length}`} line={riskLine} buyers={risk} />
     </div>
   );
 }

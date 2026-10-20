@@ -3,9 +3,12 @@ import BriefingButton from "@/components/BriefingButton";
 import DeployBadge from "@/components/DeployBadge";
 import DuelBoard from "@/components/DuelBoard";
 import GradeDonut from "@/components/GradeDonut";
+import PromiseAlert from "@/components/PromiseAlert";
+import PromiseTag, { PromiseCard } from "@/components/PromiseTag";
 import { getBuyers } from "@/lib/buyers";
 import { int, kst, pct, usd } from "@/lib/format";
 import { GOOD_MAX_LATE_DAYS, goodTop, gradeCounts, kpis, topRisk, totalAr } from "@/lib/metrics";
+import { dayToYmd, getPromises, mondayOf, todayDay } from "@/lib/promises";
 import { getRecentReviews, statusClass } from "@/lib/reviews";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +17,15 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const buyers = await getBuyers();
   const recent = await getRecentReviews(5);
+  const today = todayDay();
+  const promises = await getPromises(today);
+  const promiseById = new Map(promises.map((r) => [r.id, r.p]));
+  // 놓친 약속(날이 지났는데 '확인 필요') + 오늘부터 이번 주 일요일까지의 약속
+  const missed = promises.filter((r) => r.p.missed);
+  const thisWeek = promises.filter((r) => !r.p.missed && r.p.day >= today && r.p.day <= mondayOf(today) + 6);
+  const todayItems = promises
+    .filter((r) => r.p.diff === 0)
+    .map((r) => ({ key: String(r.id), title: `${r.buyerId} · 오늘 약속`, body: `${r.buyerName} — ${r.memo.slice(0, 100)}` }));
   const k = kpis(buyers);
   const good = goodTop(buyers, 10);
   const risk = topRisk(buyers, 10);
@@ -26,7 +38,7 @@ export default async function Home() {
     `거래처 ${int(k.count)}곳의 전체 채권은 ${int(k.arUsd)}달러입니다.`,
     `C등급 채권은 ${int(k.cArUsd)}달러로, 전체의 ${pct(k.cShare)}입니다.`,
     good[0] ? `우량 거래처 1위는 ${good[0].name}, 채권 ${int(good[0].openArUsd)}달러입니다.` : "",
-    risk[0] ? `위험 상위 1위는 ${risk[0].name}, 위험 점수 ${pct(risk[0].pd30d)}입니다.` : "",
+    risk[0] ? `위험 거래처 1위는 ${risk[0].name}, 위험 점수 ${pct(risk[0].pd30d)}입니다.` : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -60,6 +72,35 @@ export default async function Home() {
         <div className="mt-5">
           <BriefingButton text={briefing} />
         </div>
+      </section>
+
+      <section aria-labelledby="promises" className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 id="promises" className="text-lg font-bold text-ink">
+            오늘 · 이번 주 약속
+          </h2>
+          <Link
+            href="/calendar"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-accent hover:underline"
+          >
+            캘린더에서 보기
+          </Link>
+        </div>
+        <p className="text-sm text-muted">
+          오늘 <span className="num">{dayToYmd(today)}</span> 기준 · 확인 기록 메모 속 날짜로 만든 약속입니다.
+        </p>
+        <PromiseAlert today={dayToYmd(today)} items={todayItems} />
+        {missed.length + thisWeek.length > 0 ? (
+          <ul className="space-y-2">
+            {[...missed, ...thisWeek].map((r) => (
+              <li key={r.id}>
+                <PromiseCard row={r} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-muted">이번 주 약속도, 놓친 약속도 없습니다</p>
+        )}
       </section>
 
       <DuelBoard
@@ -96,6 +137,7 @@ export default async function Home() {
                   >
                     {r.status}
                   </span>
+                  {promiseById.get(r.id) ? <PromiseTag p={promiseById.get(r.id)!} /> : null}
                 </div>
                 <p className="mt-1 whitespace-pre-line wrap-break-word text-ink">{r.memo}</p>
                 <p className="mt-1 text-sm text-muted">

@@ -4,9 +4,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import GradeBadge from "@/components/GradeBadge";
 import PageHeader from "@/components/PageHeader";
+import PromiseTag from "@/components/PromiseTag";
 import ReviewForm from "@/components/ReviewForm";
 import { getBuyer } from "@/lib/buyers";
 import { int, kst, pct, usd } from "@/lib/format";
+import { promiseMap, todayDay } from "@/lib/promises";
 import { getReviews, statusClass } from "@/lib/reviews";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +27,7 @@ export default async function Page({ params }: Props) {
   const b = await getBuyer(id);
   if (!b) notFound();
   const reviews = await getReviews(b.id);
+  const promises = promiseMap(reviews, todayDay());
 
   const items: { label: string; value: ReactNode; num?: boolean }[] = [
     { label: "나라", value: b.countryKo },
@@ -83,11 +86,14 @@ export default async function Page({ params }: Props) {
           <ul className="space-y-2">
             {reviews.map((r) => (
               <li key={r.id} className="rounded-lg border border-line bg-bg p-3">
-                <span
-                  className={`inline-flex items-center rounded border px-1.5 text-sm font-semibold ${statusClass(r.status)}`}
-                >
-                  {r.status}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`inline-flex items-center rounded border px-1.5 text-sm font-semibold ${statusClass(r.status)}`}
+                  >
+                    {r.status}
+                  </span>
+                  {promises.get(r.id) ? <PromiseTag p={promises.get(r.id)!} /> : null}
+                </div>
                 <p className="mt-2 whitespace-pre-line wrap-break-word text-ink">{r.memo}</p>
                 <p className="mt-1 text-sm text-muted">
                   {r.reviewer} · <span className="num">{kst(r.createdAt)}</span>
